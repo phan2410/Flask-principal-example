@@ -103,7 +103,7 @@ def about():
 
 @app.route("/logout")
 def logout():
-    for key in ['identity.name', 'identity.auth_type']:
+    for key in ['identity.id', 'identity.auth_type']:
         session.pop(key, None)
     identity_changed.send(app, identity=AnonymousIdentity())
     return render_template('logout.html')
@@ -118,7 +118,7 @@ def authentication_failed(e):
 @app.errorhandler(403)
 def authorisation_failed(e):
     flash(('Your current identity is {id}. You need special privileges to'
-           ' access this page').format(id=g.identity.name))
+           ' access this page').format(id=g.identity.id))
 
     return render_template('privileges.html', priv=current_privileges())
 
@@ -127,13 +127,13 @@ def authorisation_failed(e):
 def on_identity_loaded(sender, identity):
     needs = []
 
-    if identity.name in ('the_only_user', 'the_only_editor', 'the_only_admin'):
+    if identity.id in ('the_only_user', 'the_only_editor', 'the_only_admin'):
         needs.append(to_sign_in)
 
-    if identity.name in ('the_only_editor', 'the_only_admin'):
+    if identity.id in ('the_only_editor', 'the_only_admin'):
         needs.append(be_editor)
 
-    if identity.name == 'the_only_admin':
+    if identity.id == 'the_only_admin':
         needs.append(be_admin)
 
     for n in needs:
